@@ -1,0 +1,86 @@
+<html>
+    <head>
+        <title>Is it home time yet?</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <style>
+            body { margin: 0; }
+            .displayContainer {
+                display: table;
+                width: 100vw;
+                height: 100vh;
+            }
+            #output {
+                display: table-cell;
+                vertical-align: middle;
+                font-family: sans-serif;
+                text-align: center;
+            }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+        <script src="https://unpkg.com/vue-router"></script>
+    </head>
+    <body>
+        <div class="displayContainer">
+            <div id="output" v-bind:style="style">
+                {{ message }}
+            </div>
+        </div>
+
+        <script>
+            var router = new VueRouter({
+                mode: 'history',
+                routes: []
+            })
+            var app = new Vue({
+                router,
+                el: '#output',
+                data: {
+                    mode: 0
+                },
+                mounted: function() {
+                    if (!this.$route.query.time) {
+                        this.mode = 0
+                        return
+                    }
+
+                    var time = this.$route.query.time.split(":")
+                    var nonWorkingDays = [ 0, 6 ]
+                    var now = new Date()
+                    if (nonWorkingDays.indexOf(now.getDay()) !== -1) {
+                        this.mode = 3
+                        return
+                    } else {
+                        var msUntilTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), time[0], time[1], 0) - now
+                        if (msUntilTime <= 0) {
+                            this.mode = 1
+                            return
+                        }
+                    }
+                    this.mode = 2
+                },
+                computed: {
+                    message() {
+                        var messages = [
+                            "When is home time? Add ?time=16:00 to finish at 4pm",
+                            "Yes! :)",
+                            "No :'(",
+                            "It's the weekend man, you ain't at work today!"
+                        ]
+                        return messages[this.mode]
+                    },
+                    style() {
+                        var backgroundColours = ["#fff", "#9acd32", "#00003b", "#fff"]
+                        var foreColours = ["#000", "#333", "#bbb", "#000"]
+                        var fontSizes = ["20px", "20vw", "20vw", "20px"]
+                        return {
+                            "background-color": backgroundColours[this.mode],
+                            "color": foreColours[this.mode],
+                            "font-size": fontSizes[this.mode]
+                        }
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>
